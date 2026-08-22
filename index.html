@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Nicholas Hirsch</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+
+  <body>
+    <!-- aria-label carries the whole name, so a screen reader never announces
+         a half-typed string. The spans are decoration, hence aria-hidden.
+         The >< line breaks sit INSIDE the tags on purpose: a newline between
+         two tags would render as a space and gap the letters. -->
+    <h1 class="terminal" aria-label="Nicholas Hirsch">
+      <span class="output" aria-hidden="true"></span
+      ><span class="cursor" aria-hidden="true"></span>
+    </h1>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

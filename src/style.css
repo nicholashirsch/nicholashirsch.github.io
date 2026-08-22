@@ -1,0 +1,60 @@
+/* Define some custom properties. */
+:root {
+  --bg-color: #000000;
+  --fg-color: #e6e6e6;
+
+  --font: "JetBrains Mono", monospace;
+
+  --edge: clamp(1.5rem, 5vw, 4rem); /* inset from the corner */
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* keeps the --edge padding inside 100dvh */
+}
+
+/* html {
+  height: 100%;
+} */
+
+body {
+  margin: 0; /* Browsers default to 8px; we don't want it */
+  min-height: 100dvh;
+  padding: var(--edge);
+
+  background: var(--bg-color);
+  color: var(--fg-color);
+  font-family: var(--font);
+
+  display: grid;
+  place-content: end start; /* align-content, then justify-content */
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2rem, 8vw, 5rem); /* min, preferred, max */
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  color: var(--fg-color);
+}
+
+
+/* Block cursor, 0.6em wide -- JetBrains Mono's advance width, so it covers
+   exactly one character cell. Hidden unless main.js says typing is underway,
+   which means no stray cursor if JS is blocked or motion is reduced. */
+.cursor {
+  display: none;
+  width: 0.6em;
+  height: 0.95em;
+  vertical-align: -0.08em;
+  background: var(--fg-color);
+
+  /* h1's letter-spacing lands after the final letter too, pushing the cursor
+     away from it. Pull it back so it sits flush. */
+  margin-left: -0.15em;
+}
+
+.terminal[data-typing] .cursor {
+  display: inline-block;
+}
