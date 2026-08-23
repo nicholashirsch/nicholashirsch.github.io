@@ -9,6 +9,8 @@
   --edge: clamp(1.5rem, 5vw, 4rem); /* inset from the corner */
 
   --subtitle-size: clamp(0.75rem, 2vw, 1.125rem);
+  --banner-height: 3rem;
+  --banner-inset: clamp(0.75rem, 1.5vw, 1.25rem); /* tighter than --edge */
 }
 
 *,
@@ -25,6 +27,7 @@ body {
   margin: 0; /* Browsers default to 8px; we don't want it */
   min-height: 100dvh;
   padding: var(--edge);
+  padding-top: calc(var(--edge) + var(--banner-height));
 
   background: var(--bg-color);
   color: var(--fg-color);
@@ -45,6 +48,39 @@ body {
   height: 100%;
   z-index: -1;
   pointer-events: none; /* nothing to click: no camera controls */
+}
+
+/* Fixed, so it holds position on any page that scrolls. Above the globe
+   (which is z-index -1) and above the text block. */
+.banner {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+
+  display: none; /* revealed with everything else, once the textures land */
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5em;
+
+  height: var(--banner-height);
+  padding-inline: var(--banner-inset);
+  border-bottom: 1px solid var(--fg-color);
+  background: var(--bg-color);
+
+  font-size: var(--subtitle-size);
+  letter-spacing: 0.15em;
+  color: var(--muted-color);
+}
+
+body[data-ready] .banner {
+  display: flex;
+}
+
+.banner-links {
+  display: flex;
+  gap: 1.5em;
 }
 
 h1 {
@@ -93,16 +129,33 @@ h1 {
   gap: 1.5em;
 }
 
-.nav a {
+.nav a,
+.banner a {
   color: inherit;
-  text-decoration: underline;
   text-underline-offset: 0.3em;
 }
 
-/* The underline is always on, so hover has to say something else. */
+/* Always underlined down here: among typed terminal output there is nothing
+   else marking these as links. */
+.nav a {
+  text-decoration: underline;
+}
+
 .nav a:hover,
 .nav a:focus-visible {
+  color: var(--fg-color); /* the underline is already on, so hover brightens */
+}
+
+/* The banner is chrome rather than content, so it stays clean until pointed at
+   and the underline is the hover state itself. */
+.banner a {
+  text-decoration: none;
+}
+
+.banner a:hover,
+.banner a:focus-visible {
   color: var(--fg-color);
+  text-decoration: underline;
 }
 
 /* The page is bottom-aligned, so a line that takes up no room until its first

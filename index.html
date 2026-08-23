@@ -21,6 +21,18 @@
          carries nothing a screen reader needs to announce. -->
     <canvas id="scene" aria-hidden="true"></canvas>
 
+    <!-- Site chrome: fixed, so it stays put on scroll and repeats on every
+         page. Hidden until main.js flags the page ready, or it would flash up
+         on its own while the globe's textures are still loading. -->
+    <header class="banner">
+      <a href="/">home</a>
+
+      <nav class="banner-links" aria-label="Sections">
+        <a href="/#projects">projects</a>
+        <a href="/#contact">contact</a>
+      </nav>
+    </header>
+
     <!-- aria-label carries the whole name, so a screen reader never announces
          a half-typed string. The spans are decoration, hence aria-hidden.
          The >< line breaks sit INSIDE the tags on purpose: a newline between

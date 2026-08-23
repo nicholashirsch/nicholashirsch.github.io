@@ -1,6 +1,6 @@
 /**WARNING CLAUDESLOP!!! */
 export class Terminal {
-  constructor(root, { speed = 51, jitter = 30 } = {}) {
+  constructor(root, { speed = 10, jitter = 30 } = {}) {
     this.root = root;
     this.output = root.querySelector(".output");
     this.speed = speed;

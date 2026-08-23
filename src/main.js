@@ -30,6 +30,7 @@ async function start() {
   await Promise.all([viewer.load(), document.fonts.ready]);
 
   viewer.start(); // first painted frame, textures already applied
+  document.body.dataset.ready = ""; // lets the static banner in
 
   if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
     for (const { terminal, text } of lines) terminal.write(text);
