@@ -2,10 +2,13 @@
 :root {
   --bg-color: #000000;
   --fg-color: #e6e6e6;
+  --muted-color: #8a8a8a; /* --fg-color at 60% over the black bg */
 
   --font: "JetBrains Mono", monospace;
 
   --edge: clamp(1.5rem, 5vw, 4rem); /* inset from the corner */
+
+  --subtitle-size: clamp(0.75rem, 2vw, 1.125rem);
 }
 
 *,
@@ -31,9 +34,22 @@ body {
   place-content: end start; /* align-content, then justify-content */
 }
 
+/* Fixed, so it never becomes a grid item and body's place-content -- along
+   with the collapse rules at the bottom of this file -- keeps working as is.
+   The black body background propagates to the root and paints behind the
+   negative z-index, so the page is black until the cubemap loads. */
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none; /* nothing to click: no camera controls */
+}
+
 h1 {
   margin: 0;
-  font-size: clamp(2rem, 8vw, 5rem); /* min, preferred, max */
+  font-size: calc(var(--subtitle-size) * 2);
   font-weight: 700;
   letter-spacing: 0.15em;
   color: var(--fg-color);
@@ -48,7 +64,7 @@ h1 {
   width: 0.6em;
   height: 0.95em;
   vertical-align: -0.08em;
-  background: var(--fg-color);
+  background: currentColor; /* so the nav's cursors dim with their link */
 
   /* h1's letter-spacing lands after the final letter too, pushing the cursor
      away from it. Pull it back so it sits flush. */
@@ -57,4 +73,47 @@ h1 {
 
 .terminal[data-typing] .cursor {
   display: inline-block;
+}
+
+/* The two lines under the name: same size, so they read as one block of
+   supporting text rather than two more headings. */
+.tagline,
+.nav {
+  margin: 0.5em 0 0;
+  font-size: var(--subtitle-size);
+  letter-spacing: 0.15em;
+  line-height: 1.4;
+  color: var(--muted-color);
+}
+
+/* flex, not a space between the tags: whitespace-only text is dropped in a
+   flex container, so the gap is the only thing setting the distance. */
+.nav {
+  display: flex;
+  gap: 1.5em;
+}
+
+.nav a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.3em;
+}
+
+/* The underline is always on, so hover has to say something else. */
+.nav a:hover,
+.nav a:focus-visible {
+  color: var(--fg-color);
+}
+
+/* The page is bottom-aligned, so a line that takes up no room until its first
+   character lands makes the block grow the way a terminal does: the new line
+   appears along the bottom edge and everything above it shifts up a row. */
+.terminal:has(.output:empty) {
+  display: none;
+}
+
+/* The nav holds a terminal per link, so it has to stay out of the flow until
+   the first of them has something in it -- not until both do. */
+.nav:not(:has(.output:not(:empty))) {
+  display: none;
 }

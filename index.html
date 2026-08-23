@@ -17,6 +17,10 @@
   </head>
 
   <body>
+    <!-- The globe. Fixed behind everything by CSS, and aria-hidden because it
+         carries nothing a screen reader needs to announce. -->
+    <canvas id="scene" aria-hidden="true"></canvas>
+
     <!-- aria-label carries the whole name, so a screen reader never announces
          a half-typed string. The spans are decoration, hence aria-hidden.
          The >< line breaks sit INSIDE the tags on purpose: a newline between
@@ -25,6 +29,24 @@
       <span class="output" aria-hidden="true"></span
       ><span class="cursor" aria-hidden="true"></span>
     </h1>
+
+    <p class="terminal tagline" aria-label="Aspiring GNC engineer">
+      <span class="output" aria-hidden="true"></span
+      ><span class="cursor" aria-hidden="true"></span>
+    </p>
+
+    <!-- Each link is its own terminal root: the class types into a single
+         .output, so two links means two roots. -->
+    <nav class="nav">
+      <a class="terminal" href="#projects" aria-label="projects">
+        <span class="output" aria-hidden="true"></span
+        ><span class="cursor" aria-hidden="true"></span>
+      </a>
+      <a class="terminal" href="#contact" aria-label="contact">
+        <span class="output" aria-hidden="true"></span
+        ><span class="cursor" aria-hidden="true"></span>
+      </a>
+    </nav>
 
     <script type="module" src="/src/main.js"></script>
   </body>
