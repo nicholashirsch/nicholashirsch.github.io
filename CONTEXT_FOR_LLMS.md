@@ -9,11 +9,11 @@ The site is going to have a couple key features/elements:
     - A satellite will be orbiting the Earth and the camera will follow it
     - Every day a different satellite will be chosen and propagated and then that will be the satellite displayed, a "satellite of the day if you will"
     - A Github action will be used to call propagation
-- Projects live on their own page at `/projects.html`, reached from the banner and the home-screen nav: a list of
+- Projects live on their own page at `/projects`, reached from the banner and the home-screen nav: a list of
   my projects with photos and brief descriptions
     - That page shares the banner and the starry skybox, but deliberately drops the Earth and the typing
       animation -- it is meant to be read, not watched
-- Contact details live on their own page at `/contact.html`: email, LinkedIn and GitHub as a
+- Contact details live on their own page at `/contact`: email, LinkedIn and GitHub as a
   row of linked boxes centred on the screen, over the same starfield and banner
 - The site will be written predominantly in JavaScript and hosted on Github Pages
     - Node.js can be used if needed

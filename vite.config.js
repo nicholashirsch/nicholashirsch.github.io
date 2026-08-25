@@ -24,8 +24,11 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(root, 'index.html'),
-        projects: resolve(root, 'projects.html'),
-        contact: resolve(root, 'contact.html'),
+        /* Directory-per-page, not projects.html: a static host has no router,
+           so /projects is only a real URL if there is a projects/index.html
+           sitting at that path. Vite mirrors this layout into dist. */
+        projects: resolve(root, 'projects/index.html'),
+        contact: resolve(root, 'contact/index.html'),
       },
     },
   },

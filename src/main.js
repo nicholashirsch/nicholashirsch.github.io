@@ -7,8 +7,8 @@ import { SatTrack } from "./gfx/sat-track.js";
 const LINES = [
   ["h1.terminal", "NICHOLAS HIRSCH"],
   [".tagline", "Aspiring GNC engineer"],
-  ['.nav a[href="/projects.html"]', "projects"],
-  ['.nav a[href="/contact.html"]', "contact"],
+  ['.nav a[href="/projects"]', "projects"],
+  ['.nav a[href="/contact"]', "contact"],
 ];
 
 // No per-line options: speed and jitter live in Terminal's defaults, so the
