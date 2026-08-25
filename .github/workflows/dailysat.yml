@@ -1,0 +1,50 @@
+name: Satellite of the day
+
+on:
+  # GitHub cron is UTC only and has no notion of daylight saving, so this is a
+  # fixed 08:00 UTC: 03:00 EST in winter, 04:00 EDT in summer. Pinning to EST
+  # is the closer reading of "3 AM EST"; move it to "0 7 * * *" if you would
+  # rather it stayed 3 AM through the summer and drifted in winter instead.
+  schedule:
+    - cron: "0 8 * * *"
+  workflow_dispatch:
+
+# The job commits the regenerated track back to the repo.
+permissions:
+  contents: write
+
+# Never two at once: both would push to the same branch and one would be
+# rejected as a non-fast-forward.
+concurrency:
+  group: dailysat
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Propagate today's satellite
+        run: npm run sat
+
+      - name: Commit the track if it changed
+        run: |
+          if git diff --quiet -- src/daily-sat/data; then
+            echo "track unchanged; nothing to commit"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/daily-sat/data
+          git commit -m "chore: satellite of the day for $(date -u +%F)"
+          git push

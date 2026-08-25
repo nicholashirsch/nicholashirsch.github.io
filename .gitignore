@@ -437,3 +437,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Cached TLE catalog for the satellite-of-the-day pipeline.
+src/daily-sat/.cache/

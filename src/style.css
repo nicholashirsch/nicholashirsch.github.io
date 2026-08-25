@@ -3,6 +3,8 @@
   --bg-color: #000000;
   --fg-color: #e6e6e6;
   --muted-color: #8a8a8a; /* --fg-color at 60% over the black bg */
+  --rule-color: #2a2a2a; /* borders and hairlines: present, not loud */
+  --sat-color: #ff2d2d; /* the satellite of the day; mirrored in sat-track.js */
 
   --font: "JetBrains Mono", monospace;
 
@@ -11,6 +13,10 @@
   --subtitle-size: clamp(0.75rem, 2vw, 1.125rem);
   --banner-height: 3rem;
   --banner-inset: clamp(0.75rem, 1.5vw, 1.25rem); /* tighter than --edge */
+
+  /* How much of the following project stays in view under the current one --
+     the whole "there is more below" cue, in one number. */
+  --peek: clamp(3.5rem, 9vh, 7rem);
 }
 
 *,
@@ -32,7 +38,12 @@ body {
   background: var(--bg-color);
   color: var(--fg-color);
   font-family: var(--font);
+}
 
+/* Scoped to the home page: it parks one block of text in the bottom-left
+   corner, which is exactly wrong for a page that scrolls. Other pages keep
+   the default block flow and simply run down from under the banner. */
+body.home {
   display: grid;
   place-content: end start; /* align-content, then justify-content */
 }
@@ -130,19 +141,23 @@ h1 {
 }
 
 .nav a,
-.banner a {
+.banner a,
+.project-links a {
   color: inherit;
   text-underline-offset: 0.3em;
 }
 
 /* Always underlined down here: among typed terminal output there is nothing
    else marking these as links. */
-.nav a {
+.nav a,
+.project-links a {
   text-decoration: underline;
 }
 
 .nav a:hover,
-.nav a:focus-visible {
+.nav a:focus-visible,
+.project-links a:hover,
+.project-links a:focus-visible {
   color: var(--fg-color); /* the underline is already on, so hover brightens */
 }
 
@@ -169,4 +184,561 @@ h1 {
    the first of them has something in it -- not until both do. */
 .nav:not(:has(.output:not(:empty))) {
   display: none;
+}
+
+
+/* ---------------------------------------------------------------------------
+   Projects page
+   --------------------------------------------------------------------------- */
+
+/* Wide, because the screenshots carry this page. Text gets its own, much
+   narrower measure on .project-blurb -- letting prose run the full width of
+   this container would be unreadable. */
+.page {
+  max-width: 96rem;
+  margin: 0 auto;
+}
+
+/* Held back on the same flag as the banner. The home page gets this for free
+   -- its lines are empty until they are typed into, and the :has() rules at
+   the top of this file keep empty terminals out of the flow -- but static
+   markup paints the instant it is parsed, well before the starfield behind it
+   has downloaded. Without this the screenshots and blurbs come up on bare
+   black and the stars arrive underneath them a beat later. */
+.page {
+  display: none;
+}
+
+body[data-ready] .page {
+  display: block;
+  animation: page-in 200ms ease-in;
+}
+
+/* Everything lands at once, so there is nothing to stagger -- this only takes
+   the hard edge off the switch. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body[data-ready] .page {
+    animation: none;
+  }
+}
+
+.page h1 {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* Image beside text, and a single column once there is no room for both.
+   The picture takes the larger track: fr rather than a fixed 20rem so it grows
+   with the viewport instead of stranding a small image in a wide column.
+   minmax(0, ...) on each track because grid items default to min-content and
+   a long unbroken word would otherwise push the column wider than its share. */
+.project {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 3rem);
+  align-items: center; /* the text rides the middle of a tall picture */
+
+  /* One project fills the screen, less a sliver of the next so it is obvious
+     the page keeps going. Spacing is padding rather than margin on purpose:
+     border-box folds it into this height, so the sum stays exactly one
+     viewport and the peek does not drift entry to entry. */
+  min-height: calc(100dvh - var(--banner-height) - var(--peek));
+  padding-block: clamp(1.5rem, 4vw, 3rem);
+  border-top: 1px solid var(--rule-color);
+}
+
+/* The h1 already separates the first one. */
+.project:first-of-type {
+  border-top: none;
+}
+
+/* width:auto rather than 100% so the box hugs the picture and the border wraps
+   it tightly -- stretching every shot to fill the column would upscale the
+   small ones into mush and leave the border floating around letterboxed
+   portraits. max-width keeps the wide ones in their track.
+
+   The height cap is what protects the one-per-screen rhythm: a portrait photo
+   in a column this wide would otherwise stand ~1100px tall and push the entry
+   past a full viewport. It mirrors the .project min-height, less that rule's
+   padding on both edges. */
+.project-shot {
+  display: block; /* kills the inline baseline gap under the image */
+  width: auto;
+  max-width: 100%;
+  max-height: calc(
+    100dvh - var(--banner-height) - var(--peek) - 2 * clamp(1.5rem, 4vw, 3rem)
+  );
+  margin-inline: auto;
+  border: 1px solid var(--rule-color);
+}
+
+.project h2 {
+  margin: 0;
+  font-size: calc(var(--subtitle-size) * 1.5);
+  letter-spacing: 0.15em;
+  color: var(--fg-color);
+}
+
+.project p {
+  margin: 0.75em 0 0;
+  font-size: var(--subtitle-size);
+  line-height: 1.6;
+  color: var(--muted-color);
+}
+
+/* A figure standing in for a single image: one or more pictures layered over
+   another. position: relative makes it the containing block for whatever is
+   layered on top.
+
+   justify-self matters: as a direct grid item it would otherwise stretch to the
+   full column, and a stretched width fights aspect-ratio -- the box would go
+   full width while max-height clamped its height, breaking the ratio and
+   squashing the base image. */
+.project-figure {
+  position: relative;
+  margin: 0;
+  justify-self: center;
+  max-height: var(--fig-cap, 46dvh);
+  max-width: 100%;
+}
+
+.figure-base {
+  display: block;
+  width: 100%;
+  height: 100%; /* fills the ratio box the figure establishes */
+  border: 1px solid var(--rule-color);
+}
+
+/* Offset down and to the left, deliberately breaking its parent's bounds so
+   the two read as layered rather than as one framed picture. Percentages are
+   of the diagram, so the overhang scales with the viewport instead of drifting
+   as the column resizes. Nothing here sets overflow: hidden -- that would clip
+   the whole effect. */
+.figure-inset {
+  position: absolute;
+  left: var(--inset-x, -6%);
+  bottom: calc(var(--drop, 0.16) * -100%);
+  width: var(--inset-w, 40%);
+
+  border: 1px solid var(--rule-color);
+
+  /* The ring is the separator: a photograph laid straight onto a busy white
+     diagram has no edge of its own. The drop shadow lifts it off the page. */
+  box-shadow:
+    0 0 0 6px var(--bg-color),
+    0 18px 40px rgb(0 0 0 / 0.6);
+}
+
+/* Three pictures in one slot: the headline result across the top, the two that
+   explain it side by side underneath. */
+.project-gallery {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  --gallery-gap: clamp(1rem, 2vw, 1.75rem);
+  gap: var(--gallery-gap);
+  align-items: center;
+  justify-items: center;
+}
+
+/* Same reasoning as .project-shot: the box hugs the picture so the border wraps
+   it rather than floating around letterboxing. */
+.project-gallery > img {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  border: 1px solid var(--rule-color);
+}
+
+/* Heights are in dvh, like the .project block itself, so the whole gallery
+   scales with the viewport instead of overflowing on a short laptop screen.
+   Capping each row is what keeps three pictures inside one screen. */
+.gallery-lead {
+  grid-column: 1 / -1;
+  max-height: 36dvh;
+}
+
+/* Per-entry, because the third picture has to stay clear of the inset hanging
+   off the opposite corner: a wide one has to be capped harder or the two meet
+   in the middle. */
+.gallery-support {
+  max-height: var(--support-cap, 36dvh);
+}
+
+/* Two images of comparable weight sharing a row, neither one leading. Sits
+   between the lead and support caps: bigger than a supporting thumbnail,
+   smaller than something spanning the full width. */
+.gallery-pair {
+  max-height: 42dvh;
+}
+
+/* One column, for an entry whose media is a composite that already fills the
+   width. */
+.project-gallery.is-stacked {
+  grid-template-columns: 1fr;
+}
+
+/* The third picture rises to sit BESIDE the inset instead of in a row below
+   it: the inset hangs off the bottom-left of the frame, this one off the
+   bottom-right, and the two share that band.
+
+   The pull-up has three parts. 0.16 cancels the frame's bottom clearance,
+   which exists only to reserve room for the inset's overhang on the left and
+   so does not apply to a picture on the right. The gap term cancels the grid
+   gap. The remaining 0.05 is the overlap itself -- a shallow lap over the
+   frame's bottom-right corner, around 25px at 1080p, scaling with the frame
+   rather than sitting at a fixed pixel value.
+
+   Calc'd from --fig-cap rather than written as a percentage, because
+   percentage margins resolve against the containing block's WIDTH and would
+   track the column rather than the frame.
+
+   position/z-index are load-bearing: .project-figure is positioned, so a later
+   in-flow sibling paints UNDERNEATH it, and the frame would cover this picture
+   along exactly the strip where they meet. */
+.is-stacked .gallery-support {
+  justify-self: end;
+
+  /* Held off the column's right edge rather than flush to it. Horizontal
+     margins DO resolve against the containing block's width, so a percentage
+     is right here -- it keeps the inset proportional as the column resizes,
+     the same way the inset's -6% does on the left. */
+  margin-right: 5%;
+  margin-top: calc(
+    (var(--fig-cap, 46dvh) * -1 * (var(--drop, 0.16) + 0.05)) -
+      var(--gallery-gap)
+  );
+
+  position: relative;
+  z-index: 1;
+
+  /* A thin ground-coloured ring so the lap reads as deliberate layering rather
+     than two pictures colliding. */
+  box-shadow:
+    0 0 0 5px var(--bg-color),
+    0 14px 32px rgb(0 0 0 / 0.55);
+}
+
+/* Clears whatever hangs off the bottom. Without it the next row -- or the
+   entry's own padding -- is overlapped by the overhanging picture.
+
+   Must NOT be a percentage: percentage margins resolve against the containing
+   block's width, so any value here would track the column rather than the
+   figure and leave a large dead gap. Derived from --fig-cap and --drop, which
+   are what actually set the height and the overhang. An entry with nothing
+   hanging below sets --drop: 0. */
+.project-figure {
+  margin-bottom: calc(var(--fig-cap, 46dvh) * var(--drop, 0.16));
+  margin-top: calc(var(--fig-cap, 46dvh) * var(--rise, 0));
+}
+
+/* Everything else on this page caps its height in dvh; a composite sized
+   purely by column width would eat a whole entry on a short screen. Capping
+   the height and letting aspect-ratio drive the width fixes that.
+
+   aspect-ratio itself is set inline on each figure, because it MUST match that
+   entry's own base image: the figure is the containing block for
+   .figure-inset, whose offsets are percentages of this box, so it has to hug
+   the base exactly. Re-export a base image at a different shape and its inline
+   ratio moves with it. --fig-cap is likewise per entry: a very wide base needs
+   less height than a squarer one. The gallery sets justify-items: center, so
+   the figure is never stretched and is free to take the width the ratio asks
+   for. */
+
+/* A column of alternate views running down the side of a frame, lapping over
+   its edge. Centred vertically and sized as a fraction of the frame, so the
+   whole arrangement scales with it.
+
+   The overhang past the frame (right) is kept smaller than the stack's own
+   width, which is what leaves a modest lap rather than a stack sitting mostly
+   outside. Keeping it this small also keeps the arrangement inside the media
+   column at every width -- push it much further and it reaches past the page
+   padding and the body scrolls sideways. */
+.figure-stack {
+  position: absolute;
+  top: 50%;
+  right: -8%;
+  transform: translateY(-50%);
+  width: var(--stack-w, 26%);
+
+  display: flex;
+  flex-direction: column;
+  /* Not a percentage: percentage gaps in a column flex box resolve against the
+     container's block size, which is auto here. */
+  gap: clamp(0.4rem, 1.2vh, 0.9rem);
+}
+
+.figure-stack img {
+  display: block;
+  width: 100%;
+  border: 1px solid var(--rule-color);
+
+  /* Ground-coloured ring, as on the inset: these lie over the frame and need an
+     edge of their own. */
+  box-shadow:
+    0 0 0 5px var(--bg-color),
+    0 14px 32px rgb(0 0 0 / 0.55);
+}
+
+/* Centred under the frame rather than off a corner. Pair it with a larger
+   --drop so most of the picture sits below and only its top edge laps over. */
+.figure-inset.is-below {
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+}
+
+/* The same stack, hung off a bottom corner instead of centred down the side --
+   for an entry whose overlays belong on top of each other rather than spread
+   across the frame. --rise reserves the clearance above, since a tall stack
+   anchored to the bottom edge reaches past the frame's top. */
+.figure-stack.is-corner {
+  top: auto;
+  bottom: calc(var(--drop, 0.16) * -100%);
+  right: auto;
+  left: var(--inset-x, -6%);
+  transform: none;
+}
+
+/* Held to a readable line length regardless of how wide its column gets. */
+.project-blurb {
+  max-width: 46ch;
+}
+
+/* The stack line: reads as a caption, so it sits a size below the blurb. */
+.project-meta {
+  font-size: calc(var(--subtitle-size) * 0.9);
+  letter-spacing: 0.1em;
+}
+
+.project-links {
+  display: flex; /* whitespace between the tags is dropped, so gap sets it */
+  gap: 1.5em;
+}
+
+/* Alternating sides, driven off position rather than a class on each entry,
+   so adding or reordering projects never means relabelling the ones below.
+
+   The markup stays image-then-text for every entry and only the placement
+   flips. That keeps the order a screen reader announces identical down the
+   page regardless of which side a picture sits on -- and the images are
+   decorative (alt="") anyway, so nothing is lost by fixing them first. */
+.project:nth-of-type(even) {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+}
+
+.project:nth-of-type(even) .project-media {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.project:nth-of-type(even) .project-body {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+@media (max-width: 40rem) {
+  .project,
+  .project:nth-of-type(even) {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: auto; /* stacked, the content is already about a screen tall */
+    align-items: start;
+  }
+
+  /* Both placements have to go back to auto here. Leaving grid-column: 2 on a
+     one-column grid would conjure an implicit second column and undo the
+     collapse, and the shared grid-row: 1 would stack the picture and the text
+     on top of each other. */
+  .project:nth-of-type(even) .project-media,
+  .project:nth-of-type(even) .project-body {
+    grid-column: 1;
+    grid-row: auto;
+  }
+
+  /* Two supporting pictures side by side on a phone would be thumbnails.
+     Stack the gallery instead. */
+  .project-gallery {
+    grid-template-columns: 1fr;
+  }
+
+  .gallery-lead {
+    grid-column: auto;
+  }
+
+  /* No room to layer anything at this width -- the inset goes back into the
+     flow underneath its diagram rather than covering a third of it. */
+  .figure-inset {
+    position: static;
+    width: 100%;
+    margin-top: 1rem;
+    box-shadow: none;
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   Contact page
+   --------------------------------------------------------------------------- */
+
+/* One block, parked in the middle of the viewport rather than running down from
+   under the banner. body's asymmetric padding (--edge plus the banner) is what
+   centres it optically rather than mathematically -- the banner's height is
+   already accounted for, so the block sits centred in the space below it. */
+body.contact {
+  display: grid;
+  place-content: center;
+}
+
+body.contact .page {
+  text-align: center;
+}
+
+body.contact .page h1 {
+  margin-bottom: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+/* Three across, sized in ch off the longest value -- the email address, which
+   has no spaces to break at. font-size is set here so those ch units match the
+   text they have to hold; the label overrides it back up. minmax(0, ...) keeps
+   a long value shrinking its own box rather than widening the row past the
+   viewport. */
+.contact-grid {
+  display: grid;
+  font-size: calc(var(--subtitle-size) * 0.85);
+  grid-template-columns: repeat(3, minmax(0, 26ch));
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The whole box is the link, not just the text in it -- a card-shaped target
+   that only responds on its label would be a small annoyance repeated three
+   times. */
+.contact-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+
+  height: 100%;
+  padding: clamp(1rem, 2.5vw, 1.75rem) 1rem;
+  border: 1px solid var(--rule-color);
+
+  color: inherit;
+  text-decoration: none;
+}
+
+.contact-card:hover,
+.contact-card:focus-visible {
+  border-color: var(--fg-color);
+}
+
+.contact-label {
+  font-size: var(--subtitle-size);
+  letter-spacing: 0.15em;
+  color: var(--fg-color);
+}
+
+/* Wraps rather than overflowing: an email address has no spaces to break at,
+   so anywhere is better than forcing the row wider. */
+.contact-value {
+  font-size: calc(var(--subtitle-size) * 0.85);
+  line-height: 1.5;
+  color: var(--muted-color);
+  overflow-wrap: anywhere;
+}
+
+.contact-card:hover .contact-value,
+.contact-card:focus-visible .contact-value {
+  color: var(--fg-color);
+}
+
+/* Stacked once three across would squeeze each box past readability. */
+@media (max-width: 40rem) {
+  .contact-grid {
+    grid-template-columns: minmax(0, 28ch);
+  }
+}
+
+
+/* ---------------------------------------------------------------------------
+   Satellite of the day
+   --------------------------------------------------------------------------- */
+
+/* Positioned by sat-track.js, which projects the marker's world position to the
+   viewport each frame and writes it into transform. Fixed, because that
+   projection is in viewport coordinates and must not be shifted by scrolling.
+
+   The offset is baked into translate() by the script; this rule only supplies
+   the nudge that lifts the name clear of the marker rather than sitting on it. */
+.sat-label {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 5;
+
+  display: none;
+
+  /* Sits above and to the right of the marker rather than on it. The script
+     translates this box onto the marker's projected position; these margins
+     are the offset from there, so they stay put as the marker moves. */
+  margin: -1.9em 0 0 1.1em;
+
+  font-size: calc(var(--subtitle-size) * 0.8);
+  letter-spacing: 0.12em;
+  color: var(--sat-color);
+  white-space: nowrap;
+
+  pointer-events: none; /* it sits over the page; nothing should catch a click */
+}
+
+/* Shown only once the script has a position for it, and only while the globe
+   is not in the way -- an unplaced label would otherwise flash in the corner. */
+body[data-ready] .sat-label[data-shown] {
+  display: block;
+}
+
+/* Bottom-right, mirroring the hero block in the opposite corner. Fixed like the
+   banner, so it holds its corner regardless of what the page does. */
+.sat-caption {
+  position: fixed;
+  right: var(--edge);
+  bottom: var(--edge);
+  z-index: 5;
+
+  display: none;
+  margin: 0;
+
+  font-size: var(--subtitle-size);
+  letter-spacing: 0.15em;
+  line-height: 1.5;
+  text-align: right;
+  color: var(--muted-color);
+}
+
+/* Shown only once a name is in it: see the note in index.html. */
+body[data-ready] .sat-caption[data-shown] {
+  display: block;
+}
+
+/* block is what puts the name on its own line. Brighter than the label above
+   it, so the name still carries the line without borrowing the marker's red. */
+.sat-caption-name {
+  display: block;
+  color: var(--fg-color);
+}
+
+/* The hero sits in the bottom-left and, on a narrow screen, is wide enough to
+   run into this. Moving the caption under the banner keeps both readable
+   rather than overlapping them. */
+@media (max-width: 40rem) {
+  .sat-caption {
+    top: calc(var(--banner-height) + var(--edge));
+    bottom: auto;
+  }
 }

@@ -1,0 +1,67 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+  # A push made with the default GITHUB_TOKEN deliberately does not trigger
+  # other workflows -- that is GitHub's loop guard -- so the daily commit can
+  # never fire the push trigger above. Chaining off the run itself is what
+  # actually gets the new track published.
+  workflow_run:
+    workflows: ["Satellite of the day"]
+    types: [completed]
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write # deploy-pages authenticates with OIDC rather than a secret
+
+# One deployment at a time, and let a newer commit supersede one still in
+# flight. Not cancel-in-progress on the daily job's group: this one is safe to
+# interrupt because nothing is committed.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    # workflow_run fires on failure too, so a failed satellite job would
+    # otherwise still trigger a deploy.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - uses: actions/configure-pages@v5
+
+      - run: npm run build-release
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

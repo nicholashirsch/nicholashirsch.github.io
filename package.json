@@ -6,9 +6,11 @@
   "scripts": {
     "build-dev": "vite",
     "build-release": "vite build",
-    "view": "vite preview"
+    "view": "vite preview",
+    "sat": "node src/daily-sat/pipeline.js"
   },
   "devDependencies": {
+    "satellite.js": "^7.1.0",
     "vite": "^8.2.2"
   },
   "dependencies": {

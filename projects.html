@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Projects — Nicholas Hirsch</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/src/style.css" />
+
+    <!-- Both the banner and the content stay hidden until projects.js says the
+         backdrop is up. With JS blocked that never happens, so hand them back:
+         no starfield, but a readable page beats a blank one. Must sit after the
+         stylesheet -- same specificity, so it wins on document order alone. -->
+    <noscript>
+      <style>
+        .banner {
+          display: flex;
+        }
+
+        .page {
+          display: block;
+        }
+      </style>
+    </noscript>
+  </head>
+
+  <!-- projects: normal top-down flow. The home page's bottom-left hero grid is
+       scoped to body.home, which would otherwise fight a page that scrolls. -->
+  <body class="projects">
+    <!-- Same canvas as home, but projects.js builds it without the globe, so
+         what lands here is the starfield on its own. -->
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <!-- Identical to the header in index.html, down to the link order: this is
+         site chrome and it should not shift between pages. Fixed by CSS, so it
+         stays pinned to the top through the whole scroll. -->
+    <header class="banner">
+      <a href="/">home</a>
+
+      <nav class="banner-links" aria-label="Sections">
+        <a href="/projects.html">projects</a>
+        <a href="/contact.html">contact</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <!-- No .terminal here on purpose. The typing is the home page's
+           signature; a page someone came to read should just be readable. -->
+      <h1>PROJECTS</h1>
+
+      <!-- TODO: replace the three placeholders below with real work. Each entry
+           is self-contained -- copy one, swap the text, drop the image in
+           src/gfx/projects/ and point at it. Vite rewrites the src at build
+           time so the file gets hashed for cache-busting.
+
+           WATCH OUT: a src that does not resolve is NOT a build error. Vite
+           leaves the URL in the HTML exactly as written, emits no warning, and
+           the image 404s in production while still looking fine in dev. After
+           renaming or moving anything under the images folder, check the built
+           dist/projects.html: every project image should have become either a
+           data URI or a hashed /assets/ path. One still pointing into the
+           source tree is a broken image.
+
+           fetchpriority="low" keeps these behind the skybox in the network
+           queue without deferring them: the page is hidden until the stars
+           land, so they download during that window and are already there when
+           it is revealed. loading="lazy" would undo that -- images inside a
+           display:none container are not fetched until it is shown, which
+           would pop them in after the reveal instead of before.
+
+           Give real screenshots width and height attributes when you add them,
+           so the box is reserved and nothing reflows as they decode.
+
+           Sides alternate automatically off nth-of-type -- every entry is
+           written image-first and the CSS flips the even ones, so adding or
+           reordering projects needs no change here. -->
+      <article class="project">
+        <!-- The cockpit carries the frame; the range view sits centred below
+             it, lapping over the bottom edge. The larger --drop is what pushes
+             most of it clear, and the frame's bottom clearance follows it. -->
+        <figure
+          class="project-media project-figure"
+          style="aspect-ratio: 1000 / 600; --drop: 0.45"
+        >
+          <img
+            class="figure-base"
+            src="/src/gfx/projects/sbms-02.jpg"
+            alt="Saber Astronautics' Space Cockpit: an asset list of tracked satellites on the left, an orbital elements panel below it, and a ring of objects around the Earth in the main view."
+            fetchpriority="low"
+          />
+          <img
+            class="figure-inset is-below"
+            style="--inset-w: 58%"
+            src="/src/gfx/projects/sbms-01.jpg"
+            alt="A geostationary belt view with several tracked satellites labelled by catalog number, and measured ranges drawn between them."
+            fetchpriority="low"
+          />
+        </figure>
+
+        <div class="project-body">
+          <h2>sbms</h2>
+          <p class="project-blurb">
+            I had the privilege of working on Saber Astronautics' Space Battle
+            Management System (SBMS). While I was there I wrote a UDL-
+            compliant conjunction assessment service capable of scanning the
+            entire tracked catalog for potential collisions. I implemented a
+            complete C++/Java pipeline including prescreening and probability
+            of collision calculation which meets TRACCS and SDS 18 guidelines.
+            I also utilized Docker to deploy a containerized version of this
+            code to Saber's Kubernetes stack.
+          </p>
+          <p class="project-meta">
+            C++ · Java · Kubernetes · Docker · Conjunction Assessment
+          </p>
+        </div>
+      </article>
+
+      <article class="project">
+        <!-- The viewer carries the frame, a rendered spacecraft laid over its
+             bottom-left, groundtracks tucked up on the right. --support-cap is
+             tighter here because that third image is over 2:1 wide and would
+             otherwise reach across into the inset. -->
+        <div class="project-media project-gallery is-stacked">
+          <figure
+            class="project-figure"
+            style="aspect-ratio: 1280 / 714; --inset-x: -3%"
+          >
+            <img
+              class="figure-base"
+              src="/src/gfx/projects/hohmannpy-01.jpg"
+              alt="The HohmannPy Viewer: several coloured orbits drawn around a textured Earth, with a properties panel listing one object's ECI state and classical orbital elements."
+              fetchpriority="low"
+            />
+            <img
+              class="figure-inset"
+              src="/src/gfx/projects/hohmannpy-03.png"
+              alt="A CubeSat rendered in orbit above the Earth with its solar panels deployed."
+              fetchpriority="low"
+            />
+          </figure>
+          <img
+            class="gallery-support"
+            style="--support-cap: 24dvh"
+            src="/src/gfx/projects/hohmannpy-02.jpg"
+            alt="A groundtrack plot over a world map, showing repeating ground traces for satellites in three different orbits."
+            fetchpriority="low"
+          />
+        </div>
+
+        <div class="project-body">
+          <h2>hohmannpy</h2>
+          <p class="project-blurb">
+            I got tired of Orekit turning all my repos into a multi-language
+            mess - so I built my own open-source astrodynamics library native
+            in Python. This is a distillation of all my astrodynamics
+            knowledge down into a single, highly optimized, core. HohmannPy
+            features a variety of propagation schemes, a robust suite of
+            perturbations (non-spherical gravity, solar radiation, etc.),
+            various orbit determination methods (including Gibbs and
+            Lagrange), quaternion-based attitude propagation, and more. All of
+            this is coupled with intelligent wiring which allows
+            constellations involving thousands of satellites to be simulated
+            for months at a time. In addition, I created the HohmannPy Viewer
+            using Qt so that users can visualize their simulations with only a
+            single additional line of code.
+          </p>
+          <p class="project-meta">Python · Astrodynamics</p>
+          <p class="project-links">
+            <a href="https://github.com/hohmannpy/hohmannpy">repo</a>
+            <a href="https://github.com/hohmannpy/hohmannpy/tree/dev-v0.2.x"
+              >repo (dev)</a
+            >
+            <a href="https://hohmannpy.github.io/user_guide/quickstart.html"
+              >docs</a
+            >
+          </p>
+        </div>
+      </article>
+
+      <article class="project">
+        <!-- Same treatment as skipper: the vertical shot hangs off the
+             bottom-left of the launch frame, team photo below. -->
+        <div class="project-media project-gallery is-stacked">
+          <figure class="project-figure" style="aspect-ratio: 1920 / 1080">
+            <img
+              class="figure-base"
+              src="/src/gfx/projects/mirage-02.jpg"
+              alt="Mirage igniting on its launch rail in the desert, a bright plume rolling out across the pad beside the propellant tanks and ground support equipment."
+              fetchpriority="low"
+            />
+            <img
+              class="figure-inset"
+              src="/src/gfx/projects/mirage-03.jpg"
+              alt="Mirage standing vertical in its launch tower on a concrete pad, desert flats and mountains behind it."
+              fetchpriority="low"
+            />
+          </figure>
+          <img
+            class="gallery-support"
+            src="/src/gfx/projects/mirage-01.jpg"
+            alt="The Florida Rocket Lab team gathered around the recovered airframe in the desert after the flight."
+            fetchpriority="low"
+          />
+        </div>
+
+        <div class="project-body">
+          <h2>mirage</h2>
+          <p class="project-blurb">
+            I had the honor of serving as the manager RE on the Florida Rocket
+            Lab's first ever liquid-propelled rocket - Mirage. I managed the
+            structures, avionics, and GNC teams. Getting to watch Mirage's
+            successful launch, flight, and recovery has been one of the
+            highlights of my career and I am forever in debt to the members of
+            FRL who made it possible. In addition, I also designed and built
+            the flight sim used to predict Mirage's apogee and ensure it was
+            stable in flight. I am proud to report that using the sim I
+            predicted Mirage's apogee to within 6% as it went on to set a
+            university altitude record.
+          </p>
+          <p class="project-meta">Python · Flight Dynamics</p>
+        </div>
+      </article>
+
+      <article class="project">
+        <!-- Same layering as the other entries: what it produces carries the
+             frame, with the tool itself laid over the bottom-left corner. -->
+        <div class="project-media project-gallery is-stacked">
+          <figure
+            class="project-figure"
+            style="aspect-ratio: 1920 / 1046; --inset-x: -2%"
+          >
+            <img
+              class="figure-base"
+              src="/src/gfx/projects/uocs-01.jpg"
+              alt="Six plots of the state trajectories x1 through x6 against time, each drawn through the discrete collocation points the solver returns."
+              fetchpriority="low"
+            />
+            <img
+              class="figure-inset"
+              src="/src/gfx/projects/uocs-02.png"
+              alt="The UOCS command-line interface, showing its ASCII banner and a numbered menu of built-in example problems to solve."
+              fetchpriority="low"
+            />
+          </figure>
+        </div>
+
+        <div class="project-body">
+          <h2>uocs</h2>
+          <p class="project-blurb">
+            I like optimal control, but even when using direct transcription
+            methods it can be tedious to design and tune the controller. As
+            such, I created UOCS: the “universal optimal control software”.
+            UOCS uses Lagrange polynomials as its basis functions in a method
+            akin to a neural network. As such, the user only needs to supply
+            three things: the plant dynamics, cost function, and relevant
+            constraints. UOCS handles the rest and spits out the discrete
+            control law and trajectory. This was the first project I completed
+            in college, and also what taught me to code; but even now I think
+            it holds its own in my portfolio. Oh, and I open sourced it.
+          </p>
+          <p class="project-meta">MATLAB · Optimal Control</p>
+          <p class="project-links">
+            <a href="https://github.com/nicholashirsch/universal-optimal-control-software"
+              >repo</a
+            >
+            <a href="https://arc.aiaa.org/doi/abs/10.2514/6.2025-99577">writeup</a>
+          </p>
+        </div>
+      </article>
+
+      <article class="project">
+        <!-- Two pictures, one slot: the controller diagram carries the frame
+             and the vehicle photo sits over its bottom-left corner. -->
+        <div class="project-media project-gallery is-stacked">
+          <figure class="project-figure" style="aspect-ratio: 1857 / 951">
+            <img
+              class="figure-base"
+              src="/src/gfx/projects/skipper-02.png"
+              alt="Simulink block diagram of Skipper's flight controller: negative state feedback through an LQI gain and a discrete integrator, passed through control constraints to thrust, reaction torque and upper and lower gimbal angle outputs."
+              fetchpriority="low"
+            />
+            <img
+              class="figure-inset"
+              src="/src/gfx/projects/skipper-01.png"
+              alt="Skipper on a concrete pad outdoors, standing on four splayed carbon-fibre legs with its avionics and wiring exposed around a central body and a vertical mast above."
+              fetchpriority="low"
+            />
+          </figure>
+          <img
+            class="gallery-support"
+            src="/src/gfx/projects/skipper-3.png"
+            alt="CAD render of Skipper: a cylindrical body carried on four splayed legs, with the rotor and motor mounted below a stack of circular decks."
+            fetchpriority="low"
+          />
+        </div>
+
+        <div class="project-body">
+          <h2>skipper</h2>
+          <p class="project-blurb">
+            When I first joined Florida Rocket Lab we hadn't even hot fired
+            our first engine, let alone begun thinking about putting one on a
+            flight vehicle. However, even back then I knew we'd need GNC
+            experience if that was ever going to be a reality. As such I
+            founded FRL's first GNC team and began leading work on Skipper: a
+            mono-propelled VTOL drone designed as FRL's GNC and avionics test
+            bed. Skipper was designed to have dynamics modeling a TVC rocket
+            and I derived the equations of motion from the ground-up to ensure
+            this was the case. I then designed Skipper's flight controller,
+            going through a series of iterations before landing on a linear-
+            quadratic integrator + extended Kalman filter combination designed
+            for both stable hovering and in-flight reference tracking.
+            Prototyping took place in MATLAB + Simulink and deployment
+            utilized C++/Arduino on a Teensy Nano.
+          </p>
+          <p class="project-meta">MATLAB · Simulink · C++</p>
+          <p class="project-links">
+            <a href="https://github.com/florida-rocket-lab/skipper-software"
+              >repo</a
+            >
+            <a href="https://arc.aiaa.org/doi/10.2514/6.2025-99754">writeup</a>
+          </p>
+        </div>
+      </article>
+
+      <article class="project">
+        <!-- The biome globe carries the frame, with the other simulated
+             fields running down its right edge and lapping over it. -->
+        <figure
+          class="project-media project-figure"
+          style="aspect-ratio: 1427 / 1138; --fig-cap: 60dvh; --drop: 0"
+        >
+          <img
+            class="figure-base"
+            src="/src/gfx/projects/ebm-01.png"
+            alt="A hexagonally tiled globe from the simulator, its cells coloured by emergent biome: blue ocean, green vegetation, and pale desert and ice toward the poles."
+            fetchpriority="low"
+          />
+          <div class="figure-stack">
+            <img
+              src="/src/gfx/projects/ebm-02.png"
+              alt="The same globe shaded by one of the simulated climate fields, running magenta near the equator through purple to blue toward the pole."
+              fetchpriority="low"
+            />
+            <img
+              src="/src/gfx/projects/ebm-03.png"
+              alt="The same globe shaded by another field, green across most of the surface with cyan and orange marking regional variation."
+              fetchpriority="low"
+            />
+            <img
+              src="/src/gfx/projects/ebm-04.png"
+              alt="The same globe shaded by a third field, grey through the mid-latitudes with blue deepening toward the south."
+              fetchpriority="low"
+            />
+          </div>
+        </figure>
+
+        <div class="project-body">
+          <h2>energy-balance-model</h2>
+          <p class="project-blurb">
+            One summer I got bored, so I built my own hyper-realistic
+            planetary climate simulator. The climate is 100% emergent,
+            everything: biome distribution, temperature/humidity profiles, and
+            more appears dynamically over the course of a simulation. I made
+            this to challenge myself, I wanted to take a subject I knew
+            nothing about and see if I could make a functional prototype out
+            of it in only a few months. Climate simulation involves a lot of
+            PDEs, so I prioritized parallelization and numerical stability so
+            that I could simulate hundreds of years in minutes. In addition,
+            in the process of building this project I built a small CFD solver
+            from scratch to model atmospheric circulation.
+          </p>
+          <p class="project-meta">C# · Multithreading · CFD</p>
+        </div>
+      </article>
+
+      <article class="project">
+        <!-- The task carries the frame; the reward curve sits directly on top
+             of the automaton that produced it, the pair hung off the bottom-left
+             as one stack. -->
+        <figure
+          class="project-media project-figure"
+          style="
+            aspect-ratio: 1174 / 578;
+            --fig-cap: 42dvh;
+            --rise: 0.09;
+            --stack-w: 42%;
+          "
+        >
+          <img
+            class="figure-base"
+            src="/src/gfx/projects/deep-rl-02.png"
+            alt="Two gridworld environments, each showing the agent, a key, a door and a box laid out in a walled grid."
+            fetchpriority="low"
+          />
+          <div class="figure-stack is-corner">
+            <img
+              src="/src/gfx/projects/deep-rl-01.png"
+              alt="Training curve of reward per episode over one million steps. PPO with the state-machine guiderail climbs to roughly 1.2, while unguided PPO stays near zero throughout."
+              fetchpriority="low"
+            />
+            <img
+              src="/src/gfx/projects/deep-rl-03.png"
+              alt="A six-state automaton encoding the task order: pick up the key, open the door, drop the key, close the door, then pick up the box, with a self-loop on each state until its condition is met."
+              fetchpriority="low"
+            />
+          </div>
+        </figure>
+
+        <div class="project-body">
+          <h2>deep-rl</h2>
+          <p class="project-blurb">
+            LLMs and agentic AI are everywhere - and I've made it my mission
+            to understand them. I spent a summer doing a deep dive into
+            reinforcement learning which culminated in me implementing my own
+            proximal policy optimization algorithm (a classic deep
+            reinforcement learning control technique). In addition, I assisted
+            in research involving using human-designed state machines as
+            guiderails to allow RL agents to train faster and more
+            efficiently.
+          </p>
+          <p class="project-meta">Python · PyTorch · Machine Learning</p>
+          <p class="project-links">
+            <!-- The repo covers the wider LTL work, so the label says which
+                 part of it is mine to claim. -->
+            <a href="https://github.com/nicholashirsch/lahrl_with_ltl"
+              >repo (PPO only)</a
+            >
+            <a href="https://icml.cc/virtual/2025/50219">writeup</a>
+          </p>
+        </div>
+      </article>
+    </main>
+
+    <script type="module" src="/src/page.js"></script>
+  </body>
+</html>

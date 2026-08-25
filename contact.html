@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Contact — Nicholas Hirsch</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <link rel="stylesheet" href="/src/style.css" />
+
+    <!-- Both the banner and the content stay hidden until page.js says the
+         backdrop is up. With JS blocked that never happens, so hand them back:
+         no starfield, but a readable page beats a blank one. Must sit after the
+         stylesheet -- same specificity, so it wins on document order alone. -->
+    <noscript>
+      <style>
+        .banner {
+          display: flex;
+        }
+
+        .page {
+          display: block;
+        }
+      </style>
+    </noscript>
+  </head>
+
+  <!-- contact: one centred block rather than a column that scrolls. -->
+  <body class="contact">
+    <!-- Same canvas as the other pages; page.js builds it without the globe, so
+         what lands here is the starfield on its own. -->
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <!-- Identical to the header in index.html, down to the link order: this is
+         site chrome and it should not shift between pages. -->
+    <header class="banner">
+      <a href="/">home</a>
+
+      <nav class="banner-links" aria-label="Sections">
+        <a href="/projects.html">projects</a>
+        <a href="/contact.html">contact</a>
+      </nav>
+    </header>
+
+    <main class="page">
+      <h1>CONTACT</h1>
+
+      <!-- Each card is a single link, so the whole box is the target rather
+           than just the text inside it. -->
+      <ul class="contact-grid">
+        <li>
+          <a class="contact-card" href="mailto:nicholashirsch@ufl.edu">
+            <span class="contact-label">email</span>
+            <span class="contact-value">nicholashirsch@ufl.edu</span>
+          </a>
+        </li>
+        <li>
+          <a
+            class="contact-card"
+            href="https://www.linkedin.com/in/nicholas-hirsch/"
+          >
+            <span class="contact-label">linkedin</span>
+            <span class="contact-value">/in/nicholas-hirsch</span>
+          </a>
+        </li>
+        <li>
+          <a class="contact-card" href="https://github.com/nicholashirsch">
+            <span class="contact-label">github</span>
+            <span class="contact-value">nicholashirsch</span>
+          </a>
+        </li>
+      </ul>
+    </main>
+
+    <script type="module" src="/src/page.js"></script>
+  </body>
+</html>

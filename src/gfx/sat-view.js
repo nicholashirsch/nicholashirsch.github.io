@@ -27,6 +27,17 @@ const EARTH_RADIUS = 1; // scene units -- everything else is measured off this
    sphere, so the extra triangles cost nothing worth counting. */
 const EARTH_SEGMENTS = [192, 96];
 const ROTATION_PERIOD_S = 120; // a real sidereal day reads as motionless
+const SIDEREAL_DAY_S = 86164;
+
+/* One wall second of animation is this many seconds of orbital time. Derived
+   from the globe's own spin rather than written down twice: anything else
+   sharing this scene -- a satellite, say -- has to advance at the same rate or
+   it will visibly slide against the ground beneath it. */
+export const TIME_SCALE = SIDEREAL_DAY_S / ROTATION_PERIOD_S;
+
+/* Scene units are Earth radii (EARTH_RADIUS is 1), so anything arriving in
+   kilometres divides by this to land in the same space. */
+export const EARTH_RADIUS_KM = 6371;
 
 /* The scene is ECI (Earth-Centered Inertial): +X is the vernal equinox, +Z is
    the north celestial pole, +Y completes the right-handed set. Three defaults
@@ -56,12 +67,16 @@ const SUN_DIRECTION = new THREE.Vector3(
   Math.sin(SOLAR_LONGITUDE) * Math.sin(OBLIQUITY),
 );
 
-/** The home-screen globe. Everything it owns hangs off the instance, so the
+/** The space backdrop: starfield cubemap, and a lit globe unless the caller
+    passes globe: false. Everything it owns hangs off the instance, so the
     satellite work can reach in later and add to the same scene. */
 export class Viewer {
-  constructor(canvas) {
+  constructor(canvas, { globe = true } = {}) {
     this.canvas = canvas;
     this.clock = new THREE.Clock();
+    /* Called once per rendered frame with the elapsed delta, for anything that
+       has to advance alongside the globe. Left null when nothing needs it. */
+    this.tick = null;
     this.started = false; // has start() ever been called
     this.running = false; // is the animation loop live right now
 
@@ -76,21 +91,28 @@ export class Viewer {
     this.sun.position.copy(SUN_DIRECTION);
     this.scene.add(this.ambient, this.sun);
 
-    /* SphereGeometry lays its poles on +Y. Rotating the geometry once puts
-       them on ECI +Z, which leaves the equator in the XY plane and the mesh's
-       own axes agreeing with the frame -- cheaper and less error-prone than a
-       wrapper group correcting for it forever.
+    /* Pages that are mostly text ask for globe: false and get the starfield
+       on its own. The mesh itself is cheap; what leaving it out really saves
+       is the 4MB albedo that load() then never requests. */
+    this.earth = null;
 
-       It also lands the map's prime meridian on +X, so earth.rotation.z reads
-       directly as Greenwich Mean Sidereal Time once real time drives it. */
-    const globe = new THREE.SphereGeometry(EARTH_RADIUS, ...EARTH_SEGMENTS);
-    globe.rotateX(Math.PI / 2);
+    if (globe) {
+      /* SphereGeometry lays its poles on +Y. Rotating the geometry once puts
+         them on ECI +Z, which leaves the equator in the XY plane and the mesh's
+         own axes agreeing with the frame -- cheaper and less error-prone than a
+         wrapper group correcting for it forever.
 
-    this.earth = new THREE.Mesh(
-      globe,
-      new THREE.MeshStandardMaterial({ roughness: 1, metalness: 0 }),
-    );
-    this.scene.add(this.earth);
+         It also lands the map's prime meridian on +X, so earth.rotation.z reads
+         directly as Greenwich Mean Sidereal Time once real time drives it. */
+      const sphere = new THREE.SphereGeometry(EARTH_RADIUS, ...EARTH_SEGMENTS);
+      sphere.rotateX(Math.PI / 2);
+
+      this.earth = new THREE.Mesh(
+        sphere,
+        new THREE.MeshStandardMaterial({ roughness: 1, metalness: 0 }),
+      );
+      this.scene.add(this.earth);
+    }
 
     this.stars = null; // set once the cubemap arrives, if it ever does
 
@@ -116,7 +138,11 @@ export class Viewer {
   async load() {
     const [stars, albedo] = await Promise.all([
       new THREE.CubeTextureLoader().loadAsync(SKYBOX_FACES).catch(() => null),
-      new THREE.TextureLoader().loadAsync(earthAlbedo).catch(() => null),
+      // Promise.all passes a plain null straight through, and the guard below
+      // already handles a missing map, so this needs no further special case.
+      this.earth
+        ? new THREE.TextureLoader().loadAsync(earthAlbedo).catch(() => null)
+        : null,
     ]);
 
     if (stars) {
@@ -143,7 +169,11 @@ export class Viewer {
   start() {
     this.started = true;
 
-    if (this.#still) {
+    /* Nothing to animate: either the viewer was asked not to build a globe, or
+       the reader asked for no motion. Paint once and skip the loop entirely.
+       Going through start() rather than a one-off render is what keeps the
+       visibilitychange handler above able to repaint after a tab switch. */
+    if (this.#still || !this.earth) {
       this.#render();
       return this;
     }
@@ -164,9 +194,12 @@ export class Viewer {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }
 
+  // Only ever reached with an earth: start() sends the globe-less case down
+  // the single-frame path instead, so this needs no guard.
   #frame() {
-    const turns = this.clock.getDelta() / ROTATION_PERIOD_S;
-    this.earth.rotation.z += turns * Math.PI * 2; // eastward, seen from north
+    const delta = this.clock.getDelta();
+    this.earth.rotation.z += (delta / ROTATION_PERIOD_S) * Math.PI * 2; // eastward
+    this.tick?.(delta);
     this.#render();
   }
 
