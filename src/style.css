@@ -577,6 +577,79 @@ body[data-ready] .page {
     margin-top: 1rem;
     box-shadow: none;
   }
+
+  /* .is-below centres the inset under the frame with a transform. The rule
+     above turns off the positioning, which drops its left/right -- but a
+     transform still applies to a static box, so without this the picture is
+     shifted half its own (now full-column) width past the left page edge. */
+  .figure-inset.is-below {
+    transform: none;
+  }
+
+  /* Same unwinding, for the stack that runs down a frame's side. Left absolute
+     it stays --stack-w of the column: around 90px of picture on a phone, laid
+     over the base image it is supposed to be read alongside.
+
+     Grid rather than the flex column it is on desktop, so a last row holding
+     one picture matches the width of the rows above it instead of stretching
+     across them. --stack-cols is per entry, like --fig-cap and --drop: two
+     across suits a set of variations on one picture, one across an entry whose
+     overlays each carry detail that has to survive to a phone. */
+  .figure-stack,
+  .figure-stack.is-corner {
+    position: static;
+    width: auto;
+    transform: none;
+    margin-top: 1rem;
+
+    display: grid;
+    grid-template-columns: repeat(var(--stack-cols, 2), minmax(0, 1fr));
+  }
+
+  /* The ring exists to separate these from the frame they lie over. In the
+     flow there is nothing underneath them, and it reads as a stray outline. */
+  .figure-stack img {
+    box-shadow: none;
+  }
+
+  /* Pulled up on desktop to lap the frame's bottom-right corner, in the band
+     the inset leaves free on the left. Here the inset is back in the flow
+     directly above, so the pull-up would drag this over it instead. */
+  .is-stacked .gallery-support {
+    justify-self: center;
+    margin-top: 0;
+    margin-right: 0;
+    box-shadow: none;
+  }
+
+  .project-figure {
+    /* Clearance below for an inset's overhang and above for a stack that
+       reaches past the top edge. Nothing hangs off the frame any more, so both
+       are dead space -- around 176px under sbms, whose --drop is 0.45. */
+    margin-top: 0;
+    margin-bottom: 0;
+
+    /* The inline ratio and the dvh cap exist to hold this box to the shape of
+       its base image, because the layered pieces are positioned against it.
+       With those pieces back in the flow the figure is just a column of
+       pictures, and both constraints turn into clipping: a grid item's
+       content-based minimum size is clamped by a definite max-height, so the
+       stack would spill over the blurb below rather than growing the box.
+
+       !important is the only way past an inline aspect-ratio, and unwinding
+       that inline value is exactly what this is for. */
+    aspect-ratio: auto !important;
+    max-height: none;
+
+    /* Safe now: the note upstairs warns that a stretched width fights
+       aspect-ratio, and there is no longer a ratio for it to fight. */
+    justify-self: stretch;
+  }
+
+  /* Filled the ratio box on desktop; here it just takes its own height. */
+  .figure-base {
+    height: auto;
+  }
 }
 
 
