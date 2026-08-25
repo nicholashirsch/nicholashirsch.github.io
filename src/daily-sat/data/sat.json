@@ -1,13 +1,13 @@
 {
-  "name": "H-2A R/B",
-  "noradId": "27601",
+  "name": "STARLINK-34819",
+  "noradId": "65040",
   "date": "2026-08-25",
   "startUtc": "2026-08-25T00:00:00.000Z",
   "stepSeconds": 30,
   "windowSeconds": 172800,
-  "periodSeconds": 6022,
+  "periodSeconds": 5631,
   "samples": 5761,
   "frame": "TEME",
   "units": "km",
-  "source": "CelesTrak GP (visual)"
+  "source": "CelesTrak GP (active)"
 }
