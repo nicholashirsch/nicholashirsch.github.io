@@ -8,6 +8,7 @@ const LINES = [
   ["h1.terminal", "NICHOLAS HIRSCH"],
   [".tagline", "Aspiring GNC engineer"],
   ['.nav a[href="/projects"]', "projects"],
+  ['.nav a[href="/Nicholas_Hirsch_Resume.pdf"]', "resume"],
   ['.nav a[href="/contact"]', "contact"],
 ];
 

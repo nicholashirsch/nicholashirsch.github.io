@@ -45,6 +45,12 @@
 
       <nav class="banner-links" aria-label="Sections">
         <a href="/projects">projects</a>
+        <!-- Lives in public/, so the URL is the filename at the site root and
+             Vite copies it through untouched. A plain nav href is never
+             rewritten by the build, so it must NOT point into src/gfx. -->
+        <a href="/Nicholas_Hirsch_Resume.pdf" target="_blank" rel="noopener"
+          >resume</a
+        >
         <a href="/contact">contact</a>
       </nav>
     </header>

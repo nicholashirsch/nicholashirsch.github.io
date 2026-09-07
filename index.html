@@ -29,6 +29,12 @@
 
       <nav class="banner-links" aria-label="Sections">
         <a href="/projects">projects</a>
+        <!-- Lives in public/, so the URL is the filename at the site root and
+             Vite copies it through untouched. A plain nav href is never
+             rewritten by the build, so it must NOT point into src/gfx. -->
+        <a href="/Nicholas_Hirsch_Resume.pdf" target="_blank" rel="noopener"
+          >resume</a
+        >
         <a href="/contact">contact</a>
       </nav>
     </header>
@@ -65,6 +71,19 @@
          .output, so two links means two roots. -->
     <nav class="nav">
       <a class="terminal" href="/projects" aria-label="projects">
+        <span class="output" aria-hidden="true"></span
+        ><span class="cursor" aria-hidden="true"></span>
+      </a>
+      <!-- Typed like its neighbours, so it needs a matching entry in main.js's
+           LINES keyed by this href -- without one the anchor stays empty and
+           .terminal:has(.output:empty) keeps it hidden for good. -->
+      <a
+        class="terminal"
+        href="/Nicholas_Hirsch_Resume.pdf"
+        target="_blank"
+        rel="noopener"
+        aria-label="resume"
+      >
         <span class="output" aria-hidden="true"></span
         ><span class="cursor" aria-hidden="true"></span>
       </a>
