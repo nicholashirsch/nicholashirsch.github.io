@@ -1,8 +1,8 @@
 {
-  "name": "STARLINK-5099",
-  "noradId": "54009",
-  "date": "2026-09-24",
-  "startUtc": "2026-09-24T00:00:00.000Z",
+  "name": "STARLINK-37391",
+  "noradId": "68779",
+  "date": "2026-09-25",
+  "startUtc": "2026-09-25T00:00:00.000Z",
   "stepSeconds": 30,
   "windowSeconds": 172800,
   "periodSeconds": 5631,
