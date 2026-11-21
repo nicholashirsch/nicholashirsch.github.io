@@ -1,8 +1,8 @@
 {
-  "name": "STARLINK-35340",
-  "noradId": "66022",
-  "date": "2026-11-20",
-  "startUtc": "2026-11-20T00:00:00.000Z",
+  "name": "STARLINK-36292",
+  "noradId": "68509",
+  "date": "2026-11-21",
+  "startUtc": "2026-11-21T00:00:00.000Z",
   "stepSeconds": 30,
   "windowSeconds": 172800,
   "periodSeconds": 5631,
